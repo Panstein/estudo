@@ -1,0 +1,16 @@
+@ProjetoCloud.Api_HostAddress = http://localhost:5119
+
+GET {{ProjetoCloud.Api_HostAddress}}/tarefas
+Accept: application/json
+
+###
+
+POST {{ProjetoCloud.Api_HostAddress}}/tarefas
+Content-Type: application/json
+
+{
+  "titulo": "Minha primeira tarefa",
+  "concluida": false
+}
+
+###

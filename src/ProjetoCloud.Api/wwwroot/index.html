@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projeto Cloud</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --text: #1d2330;
+      --muted: #667085;
+      --border: #e3e6eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --ok-bg: #ecfdf3;
+      --ok-text: #067647;
+      --err-bg: #fef3f2;
+      --err-text: #b42318;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1117;
+        --card: #181b23;
+        --text: #e6e8ec;
+        --muted: #98a2b3;
+        --border: #2a2f3a;
+        --primary: #3b82f6;
+        --primary-hover: #60a5fa;
+        --ok-bg: #0c2a1c;
+        --ok-text: #6ce9a6;
+        --err-bg: #2d1414;
+        --err-text: #fda29b;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+    }
+    h1 { margin: 0 0 4px; font-size: 1.4rem; }
+    p.sub { margin: 0 0 24px; color: var(--muted); }
+    button {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--primary);
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover:not(:disabled) { background: var(--primary-hover); }
+    button:disabled { opacity: .6; cursor: wait; }
+    #resultado {
+      margin-top: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      display: none;
+      word-break: break-word;
+    }
+    #resultado.ok { display: block; background: var(--ok-bg); color: var(--ok-text); }
+    #resultado.erro { display: block; background: var(--err-bg); color: var(--err-text); }
+    #resultado strong { display: block; margin-bottom: 8px; }
+    dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: .9rem; }
+    dt { font-weight: 600; }
+    dd { margin: 0; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Projeto Cloud</h1>
+    <p class="sub">Aplicação no Render · Banco PostgreSQL no Neon</p>
+
+    <button id="btnTestar" type="button">Testar conexão com o banco</button>
+
+    <div id="resultado" role="status" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const btn = document.getElementById('btnTestar');
+    const resultado = document.getElementById('resultado');
+
+    function escapar(texto) {
+      const div = document.createElement('div');
+      div.textContent = texto ?? '';
+      return div.innerHTML;
+    }
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Conectando...';
+      resultado.className = '';
+
+      try {
+        const resp = await fetch('/api/db/status');
+        const dados = await resp.json();
+
+        if (dados.conectado) {
+          resultado.className = 'ok';
+          resultado.innerHTML = `
+            <strong>✔ Conectado com sucesso</strong>
+            <dl>
+              <dt>Servidor</dt><dd>${escapar(dados.servidor)}</dd>
+              <dt>Banco</dt><dd>${escapar(dados.banco)}</dd>
+              <dt>Versão</dt><dd>${escapar(dados.versao.split(' on ')[0])}</dd>
+              <dt>Tempo</dt><dd>${dados.tempoMs} ms</dd>
+            </dl>`;
+        } else {
+          resultado.className = 'erro';
+          resultado.innerHTML = `<strong>✖ Falha na conexão</strong>${escapar(dados.erro)}`;
+        }
+      } catch (e) {
+        resultado.className = 'erro';
+        resultado.innerHTML = `<strong>✖ Erro ao chamar a API</strong>${escapar(e.message)}`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Testar conexão com o banco';
+      }
+    });
+  </script>
+</body>
+</html>
