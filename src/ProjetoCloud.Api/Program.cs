@@ -30,8 +30,10 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Aplica as migrations ao subir, sem derrubar a aplicação se o banco estiver indisponível
-if (connectionString is not null)
+// Aplica as migrations ao subir apenas se RUN_MIGRATIONS=true,
+// sem derrubar a aplicação se o banco estiver indisponível
+var runMigrations = string.Equals(Environment.GetEnvironmentVariable("RUN_MIGRATIONS"), "true", StringComparison.OrdinalIgnoreCase);
+if (connectionString is not null && runMigrations)
 {
     try
     {

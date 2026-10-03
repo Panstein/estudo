@@ -30,7 +30,7 @@ dotnet user-secrets set "ConnectionStrings:Default" "postgresql://..." --project
 dotnet run --project src/ProjetoCloud.Api
 ```
 
-Ao subir, as migrations são aplicadas automaticamente. Teste em `http://localhost:<porta>/tarefas`.
+As migrations (tabela `tarefas`) só são aplicadas ao subir se a variável `RUN_MIGRATIONS=true` estiver definida. Teste em `http://localhost:<porta>/tarefas`.
 
 ## 3. Deploy no Render
 
